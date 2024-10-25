@@ -37,7 +37,7 @@ final class AlpakkaTrophySpec extends AsyncWordSpec with Matchers with BeforeAnd
       val numberOfMessages = 10
       Hl7TcpClient(numberOfMessages)
 
-      // With EmbeddedKafka there is one ERROR due to port binding at the start
+      // With EmbeddedKafka there is one ERROR due to flaky port binding at the start
       new LogFileScanner().run(10, 10, "Starting test: Happy path should find all processed messages in WebsocketServer log", "ERROR").length should equal(1)
       // 10 + 1 Initial message
       new LogFileScanner().run(10, 10, "Starting test: Happy path should find all processed messages in WebsocketServer log", "WebsocketServer received:").length should equal(numberOfMessages + 1)

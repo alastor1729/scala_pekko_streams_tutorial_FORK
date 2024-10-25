@@ -17,7 +17,7 @@ class LogFileScanner(localLogFilePath: String = "logs/application.log") {
 
   private val fs: FileSystem = FileSystems.getDefault
 
-  // The patterns are case sensitive
+  // The patterns are case-sensitive
   def run(scanDelaySeconds: Int = 0, scanForSeconds: Int = 5, searchAfterPattern: String, pattern: String): List[String] = {
     val path: Path = fs.getPath(localLogFilePath)
     val pollingInterval = 250.millis
@@ -52,7 +52,7 @@ class LogFileScanner(localLogFilePath: String = "logs/application.log") {
   /**
     * To process files that were created on different operating systems.
     *
-    * @param path
+    * @param path to log file
     * @return the line separator for the file
     */
   def detectLineSeparator(path: Path): String = {

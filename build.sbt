@@ -9,9 +9,9 @@ scalaVersion := "2.13.15"
 val pekkoVersion = "1.1.2"
 val pekkoHTTPVersion = "1.1.0"
 val pekkoConnectorVersion = "1.0.2"
-val pekkoConnectorKafkaVersion = "1.0.0"
+val pekkoConnectorKafkaVersion = "1.1.0"
 
-val kafkaVersion = "3.7.0"
+val kafkaVersion = "3.8.0"
 val activemqVersion = "5.18.5" // We are stuck with 5.x
 val artemisVersion = "2.37.0"
 val testContainersVersion = "1.20.1"
