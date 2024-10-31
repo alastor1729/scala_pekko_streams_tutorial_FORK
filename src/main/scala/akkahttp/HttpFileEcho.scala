@@ -10,7 +10,7 @@ import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.http.scaladsl.server.directives.FileInfo
 import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshal
 import org.apache.pekko.stream.RestartSettings
-import org.apache.pekko.stream.scaladsl.{Compression, FileIO, RestartSource, Sink, Source}
+import org.apache.pekko.stream.scaladsl.{FileIO, RestartSource, Sink, Source}
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 import java.io.File
@@ -45,9 +45,7 @@ trait JsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
   * Added:
   *  - Retry on upload/download
   *    Doc: https://blog.colinbreck.com/backoff-and-retry-error-handling-for-akka-streams
-  *  - On the fly gzip compression on upload and gunzip decompression on download
-  *    Doc: https://doc.akka.io/docs/akka/current/stream/stream-cookbook.html#dealing-with-compressed-data-streams
-  *  - Browser client for manual upload of uncompressed files
+  *  - Browser client for manual upload
   *
   * To prove that the streaming works:
   *  - Replace testfile.jpg with a large file, eg 63MB.pdf
@@ -65,7 +63,7 @@ object HttpFileEcho extends App with JsonProtocol {
   val chuckSizeBytes = 100 * 1024 // to handle large files
 
   server(address, port)
-  (1 to 5).par.foreach(each => roundtripClient(each, address, port))
+  (1 to 50).par.foreach(each => roundtripClient(each, address, port))
   browserClient()
 
   def server(address: String, port: Int): Unit = {
@@ -81,8 +79,6 @@ object HttpFileEcho extends App with JsonProtocol {
 
     def routes: Route = logRequestResult("fileecho") {
       path("upload") {
-        withRequestTimeout(60.seconds) {
-
           formFields(Symbol("payload")) { payload =>
             println(s"Server received request with additional form data: $payload")
 
@@ -97,7 +93,6 @@ object HttpFileEcho extends App with JsonProtocol {
                 complete(Future(FileHandle(uploadedFile.getName, uploadedFile.getAbsolutePath, uploadedFile.length())))
             }
           }
-        }
       } ~
         path("download") {
           get {
@@ -155,15 +150,15 @@ object HttpFileEcho extends App with JsonProtocol {
     def createEntityFrom(file: File): Future[RequestEntity] = {
       require(file.exists())
 
-      val compressedFileSource = FileIO.fromPath(file.toPath, chuckSizeBytes).via(Compression.gzip)
+      val fileSource = FileIO.fromPath(file.toPath, chuckSizeBytes)
       val formData = Multipart.FormData(Multipart.FormData.BodyPart(
         "binary",
-        HttpEntity(MediaTypes.`application/octet-stream`, file.length(), compressedFileSource),
+        HttpEntity(MediaTypes.`application/octet-stream`, file.length(), fileSource),
         // Set the Content-Disposition header
         // see: https://www.w3.org/Protocols/HTTP/Issues/content-disposition.txt
         Map("filename" -> file.getName)),
         // Pass additional (json) payload in a form field
-        Multipart.FormData.BodyPart.Strict("payload", "{\"payload\": \"sent from Scala client\"}", Map.empty)
+        Multipart.FormData.BodyPart.Strict("payload", s"{\"payload\": \"sent from Scala client with id: $id\"}", Map.empty)
       )
 
       Marshal(formData).to[RequestEntity]
@@ -235,7 +230,6 @@ object HttpFileEcho extends App with JsonProtocol {
 
     def saveResponseToFile(response: HttpResponse, localFile: File) = {
       response.entity.dataBytes
-        .via(Compression.gunzip(chuckSizeBytes))
         .runWith(FileIO.toPath(Paths.get(localFile.getAbsolutePath)))
     }
 
@@ -247,7 +241,7 @@ object HttpFileEcho extends App with JsonProtocol {
         downloaded <- saveResponseToFile(response, localFile)
       } yield downloaded
 
-      val ioresult = Await.result(result, 1.minute)
+      val ioresult = Await.result(result, 180.seconds)
       println(s"DownloadClient with id: $id finished downloading: ${ioresult.count} bytes to file: ${localFile.getAbsolutePath}")
     }
 

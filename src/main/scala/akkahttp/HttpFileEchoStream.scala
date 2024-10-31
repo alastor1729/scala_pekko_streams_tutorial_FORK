@@ -28,18 +28,17 @@ import scala.util.{Failure, Success}
   * https://doc.akka.io/docs/akka-http/current/client-side/host-level.html#using-the-host-level-api-with-a-queue
   * https://doc.akka.io/docs/akka-http/current/client-side/host-level.html?language=scala#retrying-a-request
   *
-  *
   * Remarks:
   *  - No retry on upload because POST request is non-idempotent
-  *  - Homegrown retry on download, because this does somehow not work yet via the cachedHostConnectionPool
-  *
+  *  - Homegrown retry on download, because this does somehow not work yet via the cachedHostConnectionPool$
+  *  - Shows more robust behaviour with large files than [[akkahttp.HttpFileEcho]]
   */
 object HttpFileEchoStream extends App with JsonProtocol {
   implicit val system: ActorSystem = ActorSystem()
 
   import system.dispatcher
 
-  val resourceFileName = "testfile.jpg"
+  val resourceFileName = "63MB.pdf"
   val (address, port) = ("127.0.0.1", 6000)
   server(address, port)
   roundtripClient(address, port)
@@ -76,7 +75,7 @@ object HttpFileEchoStream extends App with JsonProtocol {
               println(s"Server: Received download request for: ${fileHandle.fileName}")
 
               // Activate to simulate rnd server ex during download
-              throwRndRuntimeException("download")
+              //throwRndRuntimeException("download")
 
               getFromFile(new File(fileHandle.absolutePath), MediaTypes.`application/octet-stream`)
             }
@@ -107,8 +106,8 @@ object HttpFileEchoStream extends App with JsonProtocol {
   def roundtripClient(address: String, port: Int) = {
 
     val filesToUpload =
-    // Unbounded stream. Limited for testing purposes by appending eg .take(5)
-      Source(LazyList.continually(FileHandle(resourceFileName, Paths.get(s"src/main/resources/$resourceFileName").toString, 0))).take(10)
+      // Unbounded stream. Limited for testing purposes by appending eg .take(n)
+      Source(LazyList.continually(FileHandle(resourceFileName, Paths.get(s"src/main/resources/$resourceFileName").toString, 0))).take(100)
 
     val hostConnectionPoolUpload = Http().cachedHostConnectionPool[FileHandle](address, port)
 
