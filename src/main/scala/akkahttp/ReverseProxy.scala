@@ -3,6 +3,7 @@ package akkahttp
 import akkahttp.ReverseProxy.Mode.Mode
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 import io.circe.*
+import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.*
 import org.apache.pekko.http.scaladsl.model.Uri.Authority
@@ -13,9 +14,11 @@ import org.apache.pekko.http.scaladsl.settings.ServerSettings
 import org.apache.pekko.http.scaladsl.{Http, HttpExt}
 import org.apache.pekko.pattern.{CircuitBreaker, CircuitBreakerOpenException}
 import org.apache.pekko.stream.ThrottleMode
-import org.apache.pekko.stream.scaladsl.{Sink, Source}
+import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}
+import org.apache.pekko.util.ByteString
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.parallel.CollectionConverters.ImmutableIterableIsParallelizable
@@ -28,10 +31,11 @@ import scala.util.{Failure, Success}
   * https://github.com/mathieuancelin/akka-http-reverse-proxy
   *
   * Features ReverseProxy:
-  *  - Weighted round robin load balancing
+  *  - Weighted round-robin load balancing
   *  - Retry on HTTP 5xx from target servers
   *  - CircuitBreaker per target server to avoid overload
   *  - HTTP Header `X-Correlation-ID` for tracing (only for Mode.local)
+  *  - HTTP Header `X-Content-Hash` as an example of an on-the-fly processing scenario
   *
   * Mode.local:
   * HTTP client(s) --> ReverseProxy --> local target server(s)
@@ -42,7 +46,7 @@ import scala.util.{Failure, Success}
   * Remarks:
   *  - The target server selection is via the "Host" HTTP header
   *  - Local/Remote target servers are designed to be flaky to show Retry/CircuitBreaker behavior
-  *  - On top of the built in client, you may also try other clients
+  *  - On top of the built-in client, you may also try other clients
   *  - This PoC may not scale well, possible bottlenecks are:
   *     - Combination of Retry/CircuitBreaker
   *     - Round robin impl. with `requestCounter` means shared state
@@ -164,6 +168,12 @@ object ReverseProxy extends App {
         uri
       }
 
+      def computeHashWithPayloadAndPayloadLength: Flow[ByteString, (MessageDigest, ByteString, Int), NotUsed] =
+        Flow[ByteString].fold((MessageDigest.getInstance("SHA-256"), ByteString.empty, 0)) { (acc, chunk) =>
+          acc._1.update(chunk.toByteBuffer)
+          (acc._1, acc._2 ++ chunk, acc._3 + chunk.length)
+        }
+
       services.get(mode) match {
         case Some(rawSeq) =>
           val seq = rawSeq.flatMap(t => (1 to t.weight).map(_ => t))
@@ -179,8 +189,22 @@ object ReverseProxy extends App {
               // If not, clients get 503 from pekko-http
               callTimeout = 10.seconds,
               resetTimeout = 10.seconds))
-            val proxyReq = request.withUri(uri(target)).withHeaders(headers(target))
-            circuitBreaker.withCircuitBreaker(http.singleRequest(proxyReq))
+
+            //  Example of an on-the-fly processing scenario
+            val hashFuture = request.entity.dataBytes
+              .via(computeHashWithPayloadAndPayloadLength)
+              .runWith(Sink.head)
+              .map { case (digest, _, _) =>
+                RawHeader("X-Content-Hash", digest.digest().map("%02x".format(_)).mkString)
+              }
+
+            hashFuture.flatMap { hashHeader =>
+              val proxyReq = request
+                .withUri(uri(target))
+                .withHeaders(headers(target) :+ hashHeader)
+              circuitBreaker.withCircuitBreaker(http.singleRequest(proxyReq))
+            }
+
           }.recover {
             case _: CircuitBreakerOpenException => BadGateway(id, "Circuit breaker opened")
             case _: TimeoutException => GatewayTimeout(id)
