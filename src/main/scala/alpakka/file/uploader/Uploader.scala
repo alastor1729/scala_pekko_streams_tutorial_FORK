@@ -10,6 +10,7 @@ import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.http.scaladsl.server.directives.FileInfo
 import org.apache.pekko.http.scaladsl.settings.ConnectionPoolSettings
 import org.apache.pekko.stream.scaladsl.FileIO
+import org.apache.tika.Tika
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.File
@@ -102,22 +103,24 @@ class Uploader(system: ActorSystem) {
     result
   }
 
+  def detectMediaType(file: File): ContentType = {
+    val tika = new Tika()
+    val detectedMediaType = tika.detect(file)
+    logger.info(s"Detected media type: $detectedMediaType")
+
+    ContentType.parse(detectedMediaType) match {
+      case Right(contentType) => contentType
+      case Left(_) => ContentTypes.`application/octet-stream`
+    }
+  }
+
   private def createEntityFrom(file: File): Future[RequestEntity] = {
     require(file.exists())
     val fileSource = FileIO.fromPath(file.toPath, chunkSize = 1000000)
 
-    // akka-http server is easy regarding the MediaType
-    // Other HTTP servers need an explicit MediaType, to be able to process the multipart POST request
-    //    val paramMapFile = Map("type" -> "text/csv", "filename" -> file.getName)
-    //
-    //    val formData = Multipart.FormData(Multipart.FormData.BodyPart(
-    //      "uploadedFile",
-    //      //HttpEntity(MediaTypes.`multipart/form-data`, file.length(), fileSource), paramMapFile))
-    //      HttpEntity(MediaTypes.`text/csv`.toContentType(HttpCharset.apply("UTF-8")(Seq.empty)), file.length(), fileSource), paramMapFile))
-
     val formData = Multipart.FormData(Multipart.FormData.BodyPart(
       "uploadedFile",
-      HttpEntity(MediaTypes.`application/octet-stream`, file.length(), fileSource),
+      HttpEntity(detectMediaType(file), file.length(), fileSource),
       Map("filename" -> file.getName)))
     Marshal(formData).to[RequestEntity]
   }
