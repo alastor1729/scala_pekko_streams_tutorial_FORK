@@ -10,10 +10,10 @@ import org.apache.pekko.http.scaladsl.server.Route
 import org.apache.pekko.http.scaladsl.server.directives.FileInfo
 import org.apache.pekko.http.scaladsl.settings.ConnectionPoolSettings
 import org.apache.pekko.stream.scaladsl.FileIO
-import org.apache.tika.Tika
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.File
+import java.nio.file.Files
 import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
@@ -104,8 +104,7 @@ class Uploader(system: ActorSystem) {
   }
 
   def detectMediaType(file: File): ContentType = {
-    val tika = new Tika()
-    val detectedMediaType = tika.detect(file)
+    val detectedMediaType = Files.probeContentType(file.toPath)
     logger.info(s"Detected media type: $detectedMediaType")
 
     ContentType.parse(detectedMediaType) match {

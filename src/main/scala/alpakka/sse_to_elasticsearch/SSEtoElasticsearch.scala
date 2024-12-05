@@ -93,7 +93,7 @@ object SSEtoElasticsearch extends App {
   //  elasticsearchContainer.start()
   private val dockerImageNameOS = DockerImageName
     .parse("opensearchproject/opensearch")
-    .withTag("1.3.16")
+    .withTag("1.3.19")
   private val searchContainer = new OpensearchContainer(dockerImageNameOS)
   searchContainer.start()
 

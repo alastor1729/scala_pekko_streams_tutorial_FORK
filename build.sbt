@@ -14,7 +14,7 @@ val pekkoConnectorKafkaVersion = "1.1.0"
 val kafkaVersion = "3.8.0"
 val activemqVersion = "5.18.5" // We are stuck with 5.x
 val artemisVersion = "2.37.0"
-val testContainersVersion = "1.20.1"
+val testContainersVersion = "1.20.4"
 val keycloakVersion = "26.0.1"
 val sttpVersion = "3.9.0"
 val influxdbVersion = "7.1.0"
@@ -98,7 +98,7 @@ libraryDependencies ++= Seq(
   "ca.uhn.hapi" % "hapi-structures-v25" % "2.3",
   "ca.uhn.hapi" % "hapi-structures-v281" % "2.3",
 
-  "org.apache.opennlp" % "opennlp-tools" % "2.3.3",
+  "org.apache.opennlp" % "opennlp-tools" % "2.5.0",
 
   "org.apache.httpcomponents.client5" % "httpclient5" % "5.4",
   "org.apache.httpcomponents.core5" % "httpcore5" % "5.3",
@@ -113,8 +113,6 @@ libraryDependencies ++= Seq(
 
   "com.github.blemale" %% "scaffeine" % "5.3.0",
   "ch.qos.logback" % "logback-classic" % "1.4.12",
-
-  "org.apache.tika" % "tika-core" % "2.9.2",
 
   "org.testcontainers" % "testcontainers" % testContainersVersion,
   "org.testcontainers" % "elasticsearch" % testContainersVersion,
