@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <title>Simple websocket Client</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
 <input type="button" onclick="connectToWS()" value="Connect to:"/>
@@ -19,17 +19,17 @@
 <ul id="messages"></ul>
 
 <script type="text/javascript">
-    var $messages = $("#messages");
-    var echoWebSocket;
+    let $messages = $("#messages");
+    let echoWebSocket;
 
     function connectToWS() {
-        var endpoint_echo = document.getElementById("endpoint_echo").value;
+        let endpoint_echo = document.getElementById("endpoint_echo").value;
         if (echoWebSocket !== undefined) {
             echoWebSocket.close()
         }
         echoWebSocket = new WebSocket(endpoint_echo);
         echoWebSocket.onmessage = function (event) {
-            var leng;
+            let leng;
             if (event.data.size === undefined) {
                 leng = event.data.length
             } else {
@@ -38,7 +38,7 @@
             $messages.prepend($("<li>" + event.data + "</li>"))
             console.log("onmessage. size: " + leng + ", content: " + event.data);
         };
-        echoWebSocket.onopen = function (evt) {
+        echoWebSocket.onopen = function () {
             $messages.prepend($("<li>OPEN</li>"))
             console.log("onopen state client: " + echoWebSocket.readyState);
         };
@@ -48,21 +48,21 @@
             // If the server closes correctly, we get a 1000 (= Normal Closure) code
             console.log("onclose - state client: " + echoWebSocket.readyState + " Reason server: " + evt.code);
         };
-        echoWebSocket.onerror = function (evt) {
+        echoWebSocket.onerror = function () {
             console.log("Error!");
         };
     }
 
-    var heartbeatWebSocket;
+    let heartbeatWebSocket;
 
     function connectToWSHeartbeat() {
-        var endpoint_heartbeat = document.getElementById("endpoint_heartbeat").value;
+        let endpoint_heartbeat = document.getElementById("endpoint_heartbeat").value;
         if (heartbeatWebSocket !== undefined) {
             heartbeatWebSocket.close()
         }
         heartbeatWebSocket = new WebSocket(endpoint_heartbeat);
         heartbeatWebSocket.onmessage = function (event) {
-            var leng;
+            let leng;
             if (event.data.size === undefined) {
                 leng = event.data.length
             } else {
@@ -71,7 +71,7 @@
             $messages.prepend($("<li>" + event.data + "</li>"))
             console.log("onmessage. size: " + leng + ", content: " + event.data);
         };
-        heartbeatWebSocket.onopen = function (evt) {
+        heartbeatWebSocket.onopen = function () {
             $messages.prepend($("<li>OPEN</li>"))
             console.log("onopen state client: " + heartbeatWebSocket.readyState);
             console.log("Requesting heartbeat stream...");
@@ -80,7 +80,7 @@
         heartbeatWebSocket.onclose = function (evt) {
             $messages.prepend($("<li>CLOSED</li>"))
             // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#status_codes
-            // If the server does not close, we would get a 1006 (= Abnormal Closure) code
+            // If the server does not close explicitly, we get a 1006 (= Abnormal Closure) code
             console.log("onclose - state client: " + heartbeatWebSocket.readyState + " Reason server: " + evt.code);
         };
         heartbeatWebSocket.onerror = function (evt) {
@@ -90,7 +90,7 @@
 
 
     function sendMsg() {
-        var message = document.getElementById("myMessage").value;
+        let message = document.getElementById("myMessage").value;
         echoWebSocket.send("Browser-" + message);
     }
 

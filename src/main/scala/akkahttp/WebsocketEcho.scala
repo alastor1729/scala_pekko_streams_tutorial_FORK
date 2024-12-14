@@ -59,16 +59,16 @@ trait ClientCommon {
 
 /**
   * Websocket echo example with different client types
-  * Each client instance produces it's own `echoFlow` on the server
+  * Each client instance produces its own `echoFlow` on the server
   *
   * Clients do not close (implicitly) due to config:
   * `http.server.websocket.periodic-keep-alive-max-idle`
   * see file `application.conf` for details
   *
-  * Currently akka http has no user API for websocket close
+  * Like akka-http, pekko-http has no built-in API for websocket close
   * see: https://github.com/akka/akka-http/issues/2458
   *
-  * Already possible explicit client closing scenarios:
+  * Already implemented explicit client closing patterns:
   *  - [[akkahttp.WebsocketEcho.serverHeartbeatStreamClient]] shows an explicit client closing scenario (also from Browser)
   *    Inspired by: https://discuss.lightbend.com/t/websocket-connection-does-not-terminate-even-when-client-tries-to-close-it/8285
   *  - [[akkahttp.WebsocketEcho.singleWebSocketRequestSourceQueueClient]]
@@ -287,11 +287,17 @@ object WebsocketEcho extends App with WebSocketDirectives with ClientCommon {
     def useWebSocket(ws: WebSocket[Future]): Future[Unit] = {
       def send(payload: String) = ws.sendText(payload)
       def receive() = ws.receiveText().map(t => logger.info(s"sttpClient $id received: $t"))
-      for {
-        _ <- send(s"$id-1 sttpClient")
-        _ <- send(s"$id-2 sttpClient")
-        _ <- receive()
-      } yield ()
+
+      val messages = (1 to 5).map(i => s"$id-$i sttpClient")
+
+      messages.foldLeft(Future.successful(())) { (prev, msg) =>
+        prev.flatMap { _ =>
+          for {
+            _ <- send(msg)
+            _ <- receive()
+          } yield ()
+        }
+      }
     }
 
     val backend = PekkoHttpBackend()
