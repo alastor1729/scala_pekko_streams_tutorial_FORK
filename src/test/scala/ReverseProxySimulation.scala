@@ -38,10 +38,45 @@ class ReverseProxySimulation extends Simulation {
         .exec(session => session.set("correlationId", session("correlationId").as[Int] + 1))
     }
 
-  setUp(
-    scn.inject(
-      atOnceUsers(10),
-      rampUsers(50).during(30.seconds)
+  // Adjust to scale load
+  val loadFactorMorning = 0.01
+  val loadFactorMidday = 0.02
+  val loadFactorEvening = 0.03
+
+  val morningPeak = scenario("Morning Peak")
+    .exec(scn)
+    .inject(
+      nothingFor(5.seconds), // initial quiet period
+      rampUsers((20 * loadFactorMorning).toInt).during(10.seconds), // ramp up
+      constantUsersPerSec(50 * loadFactorMorning).during(20.seconds), // peak load
+      rampUsersPerSec(50 * loadFactorMorning).to(10 * loadFactorMorning).during(10.seconds), // ramp down
+      constantUsersPerSec(10 * loadFactorMorning).during(10.seconds), // tail off
+      nothingFor(30.seconds) // cool down period
     )
+
+  val middayPeak = scenario("Midday Peak")
+    .exec(scn)
+    .inject(
+      nothingFor(5.seconds),
+      rampUsers((20 * loadFactorMidday).toInt).during(10.seconds),
+      constantUsersPerSec(50 * loadFactorMidday).during(20.seconds),
+      rampUsersPerSec(50 * loadFactorMidday).to(10 * loadFactorMidday).during(10.seconds),
+      constantUsersPerSec(10 * loadFactorMidday).during(10.seconds),
+      nothingFor(30.seconds)
+    )
+
+  val eveningPeak = scenario("Evening Peak")
+    .exec(scn)
+    .inject(
+      nothingFor(5.seconds),
+      rampUsers((20 * loadFactorEvening).toInt).during(10.seconds),
+      constantUsersPerSec(50 * loadFactorEvening).during(20.seconds),
+      rampUsersPerSec(50 * loadFactorEvening).to(10 * loadFactorEvening).during(10.seconds),
+      constantUsersPerSec(10 * loadFactorEvening).during(10.seconds),
+      nothingFor(30.seconds)
+    )
+
+  setUp(
+    morningPeak.andThen(middayPeak).andThen(eveningPeak)
   ).protocols(httpProtocol)
 }

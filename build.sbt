@@ -19,11 +19,11 @@ val keycloakVersion = "26.0.1"
 val sttpVersion = "3.10.1"
 val influxdbVersion = "7.1.0"
 val awsClientVersion = "2.25.32"
-val gatlingVersion = "3.12.0"
+val gatlingVersion = "3.13.1"
 val circeVersion = "0.14.8"
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
+  "org.scala-lang.modules" %% "scala-parallel-collections" % "1.1.0",
 
   "org.apache.pekko" %% "pekko-stream" % pekkoVersion,
   "org.apache.pekko" %% "pekko-stream-typed" % pekkoVersion,
@@ -124,7 +124,7 @@ libraryDependencies ++= Seq(
   "org.testcontainers" % "localstack" % testContainersVersion,
   "org.testcontainers" % "clickhouse" % testContainersVersion,
 
-  "com.clickhouse" % "clickhouse-jdbc" % "0.6.1",
+  "com.clickhouse" % "clickhouse-jdbc" % "0.6.5",
   "com.crobox.clickhouse" %% "client" % "1.2.2",
 
   "org.opensearch" % "opensearch-testcontainers" % "2.0.1",
@@ -140,8 +140,8 @@ libraryDependencies ++= Seq(
   "org.jboss.spec.javax.ws.rs" % "jboss-jaxrs-api_2.1_spec" % "2.0.2.Final",
 
   "org.postgresql" % "postgresql" % "42.7.4",
-  "io.zonky.test.postgres" % "embedded-postgres-binaries-bom" % "16.4.0" % Test pomOnly(),
-  "io.zonky.test" % "embedded-postgres" % "2.0.7" % Test,
+  "io.zonky.test.postgres" % "embedded-postgres-binaries-bom" % "16.6.0" % Test pomOnly(),
+  "io.zonky.test" % "embedded-postgres" % "2.1.0" % Test,
 
   "org.scalatest" %% "scalatest" % "3.2.18" % Test,
   "org.apache.pekko" %% "pekko-testkit" % pekkoVersion % Test,

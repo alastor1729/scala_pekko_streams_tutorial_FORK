@@ -46,7 +46,8 @@ import scala.util.{Failure, Success}
   * Remarks:
   *  - The target server selection is via the "Host" HTTP header
   *  - Local/Remote target servers are designed to be flaky to show Retry/CircuitBreaker behavior
-  *  - On top of the built-in client, you may also try other clients
+  *    eg for Local adjust [[responseCodes]]
+  *  - On top of the built-in client, you may also try other clients, see below
   *  - This PoC may not scale well, possible bottlenecks are:
   *     - Combination of Retry/CircuitBreaker
   *     - Round robin impl. with `requestCounter` means shared state
@@ -93,9 +94,12 @@ object ReverseProxy extends App {
     )
   )
 
-  localTargetServers(maxConnections = 5) // 1-1024
+  // For Mode.local: Adjust to provoke more retries on ReverseProxy
+  val responseCodes = List(200, 200, 200, 200, 200, 200, 200, 200, 500, 503)
+
+  localTargetServers(maxConnections = 100) // 1-1024
   reverseProxy()
-  // Switch here to force ReverseProxy to forward requests to local or remote target server(s)
+  // Switch here to force ReverseProxy to forward requests to local/remote target server(s)
   clients(nbrOfClients = 10, requestsPerClient = 10, Mode.local)
 
   // HTTP client(s)
@@ -233,11 +237,9 @@ object ReverseProxy extends App {
           Thread.sleep(500)
           val id = request.getHeader("X-Correlation-ID").orElse(RawHeader("X-Correlation-ID", "N/A")).value()
 
-          // Adjust to provoke more retries on ReverseProxy
-          val codes = List(200, 200, 200, 500, 500, 500)
-          val randomResponse = codes(new scala.util.Random().nextInt(codes.length))
-          logger.info(s"Target server: ${request.uri.authority.host}:${request.uri.effectivePort} got echo request with id: $id, reply with: $randomResponse")
-          (StatusCode.int2StatusCode(randomResponse), Seq(RawHeader("X-Correlation-ID", id)))
+          val randomResponseCode = responseCodes(new scala.util.Random().nextInt(responseCodes.length))
+          logger.info(s"Target server: ${request.uri.authority.host}:${request.uri.effectivePort} got echo request with id: $id, reply with: $randomResponseCode")
+          (StatusCode.int2StatusCode(randomResponseCode), Seq(RawHeader("X-Correlation-ID", id)))
         }
       }
 
