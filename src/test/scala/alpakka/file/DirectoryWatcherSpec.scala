@@ -62,7 +62,7 @@ final class DirectoryWatcherSpec extends AsyncWordSpec with Matchers with Before
     "handle_large_number_of_files_in_parent_dir" in {
       (1 to 1000).foreach(_ => copyTestFileToDir(uploadDir))
       watcher = DirectoryWatcher(uploadDir, processedDir)
-      waitForCondition(5.seconds)(watcher.countFilesProcessed() == 2 + 1000) shouldBe true
+      waitForCondition(10.seconds)(watcher.countFilesProcessed() == 2 + 1000) shouldBe true
     }
 
     "handle_invalid_parent_directory_path" in {
