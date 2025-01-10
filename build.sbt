@@ -6,12 +6,12 @@ version := "1.0"
 
 scalaVersion := "2.13.15"
 
-val pekkoVersion = "1.1.2"
+val pekkoVersion = "1.1.3"
 val pekkoHTTPVersion = "1.1.0"
 val pekkoConnectorVersion = "1.0.2"
 val pekkoConnectorKafkaVersion = "1.1.0"
 
-val kafkaVersion = "3.8.0"
+val kafkaVersion = "3.8.1"
 val activemqVersion = "5.18.5" // We are stuck with 5.x
 val artemisVersion = "2.37.0"
 val testContainersVersion = "1.20.4"
@@ -124,8 +124,8 @@ libraryDependencies ++= Seq(
   "org.testcontainers" % "localstack" % testContainersVersion,
   "org.testcontainers" % "clickhouse" % testContainersVersion,
 
-  "com.clickhouse" % "clickhouse-jdbc" % "0.6.5",
-  "com.crobox.clickhouse" %% "client" % "1.2.2",
+  "com.clickhouse" % "clickhouse-jdbc" % "0.7.2",
+  "com.crobox.clickhouse" %% "client" % "1.2.6",
 
   "org.opensearch" % "opensearch-testcontainers" % "2.0.1",
   "com.github.dasniko" % "testcontainers-keycloak" % "3.5.1",

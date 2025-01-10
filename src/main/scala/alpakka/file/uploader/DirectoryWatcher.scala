@@ -4,7 +4,7 @@ import org.apache.commons.io.monitor.{FileAlterationListenerAdaptor, FileAlterat
 import org.apache.pekko.actor.{ActorSystem, Terminated}
 import org.apache.pekko.stream.connectors.file.scaladsl.Directory
 import org.apache.pekko.stream.scaladsl.{Sink, Source, SourceQueueWithComplete}
-import org.apache.pekko.stream.{OverflowStrategy, QueueOfferResult}
+import org.apache.pekko.stream.{ActorAttributes, OverflowStrategy, QueueOfferResult, Supervision}
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.File
@@ -43,6 +43,7 @@ class DirectoryWatcher(uploadDir: Path, processedDir: Path) {
   private val uploadSourceQueue: SourceQueueWithComplete[Path] = Source
     .queue[Path](bufferSize = 1000, OverflowStrategy.backpressure, maxConcurrentOffers = 1000)
     .mapAsync(1)(path => uploadAndMove(path))
+    .withAttributes(ActorAttributes.supervisionStrategy(Supervision.restartingDecider))
     .to(Sink.ignore)
     .run()
 
@@ -103,11 +104,15 @@ class DirectoryWatcher(uploadDir: Path, processedDir: Path) {
   }
 
   private def uploadAndMove(path: Path) = {
-    if (path.toFile.isFile) {
+    if (Files.exists(path) && path.toFile.isFile && Files.isReadable(path)) {
       logger.info(s"About to upload and move file: $path")
-      uploader.upload(path.toFile).andThen { case _ => move(path) }
+      val response = uploader.upload(path.toFile).andThen { case _ => move(path) }
+      logger.info(s"Successfully uploaded and moved file: $path")
+      response
     } else {
-      Future.successful("Do nothing on dir")
+      val msg = s"Do nothing for: $path (because unreadable file or dir)"
+      logger.info(msg)
+      Future.successful(msg)
     }
   }
 

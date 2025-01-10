@@ -102,7 +102,7 @@ public class ConnectionStatusChecker {
      */
     private boolean testPing(String hostAddress) throws IOException, InterruptedException {
         String os = System.getProperty("os.name");
-        String pingOption = (os.equals("Windows 10")) ? "n" : "c";
+        String pingOption = (os.startsWith("windows")) ? "n" : "c";
 
         String[] cmd = {"ping", "-" + pingOption, "1", hostAddress};
         Process p1 = java.lang.Runtime.getRuntime().exec(cmd);

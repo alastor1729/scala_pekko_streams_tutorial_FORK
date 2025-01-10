@@ -63,7 +63,7 @@ public class FirehoseEchoIT {
         if (os.equals("mac os x")) {
             String[] cmd = {"open", elasticsearchEndpoint};
             Runtime.getRuntime().exec(cmd);
-        } else if (os.equals("windows 10")) {
+        } else if (os.startsWith("windows")) {
             String[] cmd = {"cmd /c start", elasticsearchEndpoint};
             Runtime.getRuntime().exec(cmd);
         } else {

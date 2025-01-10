@@ -99,7 +99,7 @@ public class InfluxdbIT {
         if (os.equals("mac os x")) {
             String[] cmd = {"open", influxURL};
             Runtime.getRuntime().exec(cmd);
-        } else if (os.equals("windows 10")) {
+        } else if (os.startsWith("windows")) {
             String[] cmd = {"cmd /c start", influxURL};
             Runtime.getRuntime().exec(cmd);
         } else {

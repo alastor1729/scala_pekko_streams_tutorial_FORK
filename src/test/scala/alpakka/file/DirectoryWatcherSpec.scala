@@ -29,39 +29,43 @@ final class DirectoryWatcherSpec extends AsyncWordSpec with Matchers with Before
   var processedDir: Path = _
 
   "DirectoryWatcher" should {
-    "detect_files_on_startup" in {
+    "detect_files_on_startup_in_parent_dir" in {
       watcher = DirectoryWatcher(uploadDir, processedDir)
       waitForCondition(3.seconds)(watcher.countFilesProcessed() == 2) shouldBe true
     }
 
-    "detect_added_files_at_runtime_in_parent" in {
-      copyTestFileToDir(uploadDir)
+    "detect_added_file_at_runtime_in_parent_dir" in {
       watcher = DirectoryWatcher(uploadDir, processedDir)
+      copyTestFileToDir(uploadDir)
       waitForCondition(3.seconds)(watcher.countFilesProcessed() == 2 + 1) shouldBe true
     }
 
-    "detect_added_files_at_runtime_in_subdir" in {
-      copyTestFileToDir(uploadDir.resolve("subdir"))
+    "detect_added_files_at_runtime_in_sub_dir" in {
       watcher = DirectoryWatcher(uploadDir, processedDir)
+      copyTestFileToDir(uploadDir.resolve("subdir"))
       waitForCondition(3.seconds)(watcher.countFilesProcessed() == 2 + 1) shouldBe true
     }
 
     "detect_added_nested_subdir_at_runtime_with_files_in_subdir" in {
+      watcher = DirectoryWatcher(uploadDir, processedDir)
       val tmpDir = Files.createTempDirectory("tmp")
       val sourcePath = Paths.get("src/main/resources/testfile.jpg")
       val targetPath = tmpDir.resolve(createUniqueFileName(sourcePath.getFileName))
       val targetPath2 = tmpDir.resolve(createUniqueFileName(sourcePath.getFileName))
       Files.copy(sourcePath, targetPath)
       Files.copy(sourcePath, targetPath2)
-
       val targetDir = Files.createDirectories(uploadDir.resolve("subdir").resolve("nestedDirWithFiles"))
       FileUtils.copyDirectory(tmpDir.toFile, targetDir.toFile)
-
-      watcher = DirectoryWatcher(uploadDir, processedDir)
       waitForCondition(3.seconds)(watcher.countFilesProcessed() == 2 + 2) shouldBe true
     }
 
-    "handle invalid parent directory path" in {
+    "handle_large_number_of_files_in_parent_dir" in {
+      (1 to 1000).foreach(_ => copyTestFileToDir(uploadDir))
+      watcher = DirectoryWatcher(uploadDir, processedDir)
+      waitForCondition(5.seconds)(watcher.countFilesProcessed() == 2 + 1000) shouldBe true
+    }
+
+    "handle_invalid_parent_directory_path" in {
       val invalidParentDir = Paths.get("/path/to/non-existent/directory")
       val processedDir = Files.createTempDirectory("processed")
 

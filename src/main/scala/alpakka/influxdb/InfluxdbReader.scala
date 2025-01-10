@@ -35,8 +35,6 @@ class InfluxdbReader(baseURL: String, token: String, org: String = "testorg", bu
   implicit val system: ActorSystem = actorSystem
   implicit val ec: ExecutionContextExecutor = actorSystem.dispatcher
 
-  //import system.dispatcher
-
   val deciderFlow: Supervision.Decider = {
     case NonFatal(e) =>
       logger.info(s"Stream failed with: ${e.getMessage}, going to restart")

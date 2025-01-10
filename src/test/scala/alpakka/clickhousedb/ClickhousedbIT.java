@@ -208,7 +208,7 @@ public class ClickhousedbIT {
         if (os.equals("mac os x")) {
             String[] cmd = {"open", tabuxURL};
             Runtime.getRuntime().exec(cmd);
-        } else if (os.equals("windows 10")) {
+        } else if (os.startsWith("windows")) {
             String[] cmd = {"cmd /c start", tabuxURL};
             Runtime.getRuntime().exec(cmd);
         } else {
