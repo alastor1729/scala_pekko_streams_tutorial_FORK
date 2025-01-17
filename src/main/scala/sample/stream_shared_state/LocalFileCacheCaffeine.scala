@@ -28,7 +28,7 @@ import scala.util.control.NonFatal
   *  - On downstream error: the path needs to be kept longer in the cache
   *  - On restart: populate cache from local filesystem
   *
-  * Before running this class: start [[alpakka.env.FileServer]] to simulate non idempotent responses
+  * Before running this class: start [[alpakka.env.FileServer]] to simulate non-idempotent responses
   * Monitor `localFileCache` dir with cmd:  watch ls -ltr
   *
   * Doc:

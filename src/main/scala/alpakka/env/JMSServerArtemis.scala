@@ -29,6 +29,10 @@ object JMSServerArtemis extends App {
   val port = 21616
   val serverUrl = s"tcp://$host:$port"
 
+  // Does not run with Java 23, this suggested workaround does not help
+  // Doc: https://issues.apache.org/jira/browse/ARTEMIS-4975
+  System.setProperty("java.security.manager", "allow")
+
   val securityConfig = new SecurityConfiguration()
   securityConfig.addUser("artemis", "artemis")
   securityConfig.addRole("artemis", "guest")

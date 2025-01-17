@@ -36,7 +36,6 @@ object PublishToSourceQueueFromMultipleThreads extends App {
   import system.dispatcher
 
   val bufferSize = 100
-  // As of akka 2.6.x there is a thread safe implementation for SourceQueue
   val maxConcurrentOffers = 1000
   val numberOfPublishingClients = 1000
 

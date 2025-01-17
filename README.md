@@ -30,7 +30,7 @@ exactly this feeling by offering a collection of runnable examples.
 
 ### Prerequisites
 
-Java 17 or higher (recommended: [GraalVM JDK 21](https://www.graalvm.org/downloads))
+Java 17 or higher (recommended: [GraalVM](https://www.graalvm.org/downloads))
 
 ### Installation
 

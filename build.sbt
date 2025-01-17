@@ -8,12 +8,12 @@ scalaVersion := "2.13.15"
 
 val pekkoVersion = "1.1.3"
 val pekkoHTTPVersion = "1.1.0"
-val pekkoConnectorVersion = "1.0.2"
+val pekkoConnectorVersion = "1.1.0"
 val pekkoConnectorKafkaVersion = "1.1.0"
 
 val kafkaVersion = "3.8.1"
 val activemqVersion = "5.18.5" // We are stuck with 5.x
-val artemisVersion = "2.37.0"
+val artemisVersion = "2.39.0"
 val testContainersVersion = "1.20.4"
 val keycloakVersion = "26.0.1"
 val sttpVersion = "3.10.1"
@@ -23,7 +23,7 @@ val gatlingVersion = "3.13.1"
 val circeVersion = "0.14.8"
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-parallel-collections" % "1.1.0",
+  "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0",
 
   "org.apache.pekko" %% "pekko-stream" % pekkoVersion,
   "org.apache.pekko" %% "pekko-stream-typed" % pekkoVersion,

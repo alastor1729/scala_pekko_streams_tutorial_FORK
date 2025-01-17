@@ -1,9 +1,10 @@
 package alpakka.kinesis
 
-import com.github.pjfanning.pekkohttpspi.PekkoHttpClient
+
 import org.apache.commons.validator.routines.UrlValidator
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.connectors.awsspi.PekkoHttpClient
 import org.apache.pekko.stream.connectors.kinesis.scaladsl.{KinesisFlow, KinesisSource}
 import org.apache.pekko.stream.connectors.kinesis.{KinesisFlowSettings, ShardIterator, ShardSettings}
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}

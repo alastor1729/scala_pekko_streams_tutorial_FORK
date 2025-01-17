@@ -10,7 +10,7 @@ import scala.util.{Failure, Success}
 
 /**
   * Drop identical (consecutive or non-consecutive) elements in an
-  * unbounded stream using the squbs `Deduplicate` GraphStage:
+  * unbounded stream using the (re-implemented) squbs `Deduplicate` GraphStage:
   * https://squbs.readthedocs.io/en/latest/deduplicate
   *
   * More general than: [[DeduplicateConsecutiveElements]]

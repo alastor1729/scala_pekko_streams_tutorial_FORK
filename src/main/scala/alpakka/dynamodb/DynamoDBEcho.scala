@@ -1,9 +1,10 @@
 package alpakka.dynamodb
 
 
-import com.github.pjfanning.pekkohttpspi.PekkoHttpClient
+
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.connectors.awsspi.PekkoHttpClient
 import org.apache.pekko.stream.connectors.dynamodb.scaladsl.DynamoDb
 import org.apache.pekko.stream.scaladsl.{FlowWithContext, Sink, Source}
 import org.slf4j.LoggerFactory

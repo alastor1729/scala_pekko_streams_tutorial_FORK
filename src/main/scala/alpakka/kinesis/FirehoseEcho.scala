@@ -1,9 +1,9 @@
 package alpakka.kinesis
 
-import com.github.pjfanning.pekkohttpspi.PekkoHttpClient
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.Attributes
+import org.apache.pekko.stream.connectors.awsspi.PekkoHttpClient
 import org.apache.pekko.stream.connectors.kinesisfirehose.scaladsl.KinesisFirehoseFlow
 import org.apache.pekko.stream.connectors.s3.AccessStyle.PathAccessStyle
 import org.apache.pekko.stream.connectors.s3.scaladsl.S3

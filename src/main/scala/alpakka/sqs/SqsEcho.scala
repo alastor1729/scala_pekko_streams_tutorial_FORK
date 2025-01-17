@@ -1,8 +1,8 @@
 package alpakka.sqs
 
-import com.github.pjfanning.pekkohttpspi.PekkoHttpClient
 import org.apache.commons.validator.routines.UrlValidator
 import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.connectors.awsspi.PekkoHttpClient
 import org.apache.pekko.stream.connectors.sqs.*
 import org.apache.pekko.stream.connectors.sqs.scaladsl.{SqsAckSink, SqsPublishSink, SqsSource}
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}
