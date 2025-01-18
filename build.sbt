@@ -98,7 +98,7 @@ libraryDependencies ++= Seq(
   "ca.uhn.hapi" % "hapi-structures-v25" % "2.3",
   "ca.uhn.hapi" % "hapi-structures-v281" % "2.3",
 
-  "org.apache.opennlp" % "opennlp-tools" % "2.5.0",
+  "org.apache.opennlp" % "opennlp-tools" % "2.5.3",
 
   "org.apache.httpcomponents.client5" % "httpclient5" % "5.4",
   "org.apache.httpcomponents.core5" % "httpcore5" % "5.3",
@@ -127,7 +127,7 @@ libraryDependencies ++= Seq(
   "com.clickhouse" % "clickhouse-jdbc" % "0.7.2",
   "com.crobox.clickhouse" %% "client" % "1.2.6",
 
-  "org.opensearch" % "opensearch-testcontainers" % "2.0.1",
+  "org.opensearch" % "opensearch-testcontainers" % "2.1.2",
   "com.github.dasniko" % "testcontainers-keycloak" % "3.5.1",
   "eu.rekawek.toxiproxy" % "toxiproxy-java" % "2.1.7",
   "org.testcontainers" % "junit-jupiter" % testContainersVersion % Test,

@@ -39,7 +39,7 @@ import scala.util.control.NonFatal
   * do NER processing for persons in EN
   * and write the results to either:
   *  - Elasticsearch version 7.x server
-  *  - Opensearch version 1.x server
+  *  - Opensearch version 2.x server
   *
   * Remarks:
   *  - We still need spray.json because of the elasticsearch pekko connectors
@@ -63,7 +63,7 @@ object SSEtoElasticsearch extends App {
   }
 
   // 2.x model from https://opennlp.apache.org/models.html
-  private val tokenModel = new TokenizerModel(new FileInputStream(Paths.get("src/main/resources/opennlp-en-ud-ewt-tokens-1.0-1.9.3.bin").toFile))
+  private val tokenModel = new TokenizerModel(new FileInputStream(Paths.get("src/main/resources/opennlp-en-ud-ewt-tokens-1.2-2.5.0.bin").toFile))
   // 1.5 model from https://opennlp.sourceforge.net/models-1.5
   private val personModel = new TokenNameFinderModel(new FileInputStream(Paths.get("src/main/resources/en-ner-person.bin").toFile))
 
@@ -93,7 +93,7 @@ object SSEtoElasticsearch extends App {
   //  elasticsearchContainer.start()
   private val dockerImageNameOS = DockerImageName
     .parse("opensearchproject/opensearch")
-    .withTag("1.3.19")
+    .withTag("2.18.0")
   private val searchContainer = new OpensearchContainer(dockerImageNameOS)
   searchContainer.start()
 
@@ -110,7 +110,7 @@ object SSEtoElasticsearch extends App {
 
   private val sourceSettings = ElasticsearchSourceSettings(connectionSettings).withApiVersion(ApiVersion.V7)
 
-  // Note that ElasticsearchSource reads are scroll requests, where you are able to fetch even the entire collection of documents
+  // ElasticsearchSource reads are "scroll requests". Allows to fetch the entire collection of documents
   private val elasticsearchSourceTyped = ElasticsearchSource
     .typed[Ctx](
       searchParams,
@@ -243,7 +243,7 @@ object SSEtoElasticsearch extends App {
     //.mapAsync(3)(ctx => findPersonsRemoteGpt3NER(ctx))
     .filter(ctx => ctx.personsFound.nonEmpty)
 
-  logger.info(s"Elasticsearch container listening on: ${searchContainer.getHttpHostAddress}")
+  logger.info(s"Elasticsearch/Opensearch container listening on: ${searchContainer.getHttpHostAddress}")
   logger.info("About to start processing flow...")
 
   restartSource
