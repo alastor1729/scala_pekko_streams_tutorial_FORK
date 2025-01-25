@@ -295,7 +295,7 @@ object AmqpEcho extends App {
     val os = System.getProperty("os.name").toLowerCase
     val url = rabbitMQContainer.getHttpUrl
     if (os == "mac os x") Process(s"open $url").!
-    else if (os == "windows 10") Seq("cmd", "/c", s"start $url").!
+    else if (os.startsWith("windows")) Seq("cmd", "/c", s"start $url").!
   }
 
   browserClient()

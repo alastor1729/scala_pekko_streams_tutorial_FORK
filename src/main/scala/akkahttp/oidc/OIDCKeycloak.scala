@@ -254,7 +254,7 @@ object OIDCKeycloak extends App with CORSHandler with JsonSupport {
   def browserClient() = {
     val os = System.getProperty("os.name").toLowerCase
     if (os == "mac os x") Process(s"open http://127.0.0.1:6002").!
-    else if (os == "windows 10") Seq("cmd", "/c", s"start http://127.0.0.1:6002").!
+    else if (os.startsWith("windows")) Seq("cmd", "/c", s"start http://127.0.0.1:6002").!
   }
 
 

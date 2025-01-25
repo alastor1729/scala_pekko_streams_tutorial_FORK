@@ -267,7 +267,7 @@ object SSEtoElasticsearch extends App {
     val os = System.getProperty("os.name").toLowerCase
     val url = s"http://localhost:${searchContainer.getMappedPort(9200)}/$indexName/_search?q=personsFound:*&size=100"
     if (os == "mac os x") Process(s"open $url").!
-    else if (os == "windows 10") Seq("cmd", "/c", s"start $url").!
+    else if (os.startsWith("windows")) Seq("cmd", "/c", s"start $url").!
     else logger.info(s"Please open a browser at: $url")
   }
 

@@ -253,6 +253,6 @@ object HttpFileEcho extends App with JsonProtocol {
   def browserClient() = {
     val os = System.getProperty("os.name").toLowerCase
     if (os == "mac os x") Process(s"open http://$address:$port").!
-    else if (os == "windows 10") Seq("cmd", "/c", s"start http://$address:$port").!
+    else if (os.startsWith("windows")) Seq("cmd", "/c", s"start http://$address:$port").!
   }
 }
